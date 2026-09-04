@@ -1,6 +1,6 @@
-const RECAPTCHA_SCRIPT_ID = "google-recaptcha-v2";
+const RECAPTCHA_SCRIPT_ID = "google-recaptcha-enterprise-checkbox";
 const RECAPTCHA_SCRIPT_URL =
-  "https://www.google.com/recaptcha/api.js?render=explicit";
+  "https://www.google.com/recaptcha/enterprise.js?render=explicit";
 
 type RecaptchaRenderOptions = {
   callback?: (token: string) => void;
@@ -21,7 +21,9 @@ type RecaptchaClient = {
 };
 
 type RecaptchaWindow = Window &
-  typeof globalThis & { grecaptcha?: RecaptchaClient };
+  typeof globalThis & {
+    grecaptcha?: { enterprise?: RecaptchaClient };
+  };
 
 let scriptLoadPromise: Promise<void> | null = null;
 
@@ -38,7 +40,7 @@ export const getRecaptchaSiteKey = () => {
 };
 
 const loadRecaptchaScript = async () => {
-  const existingClient = (window as RecaptchaWindow).grecaptcha;
+  const existingClient = (window as RecaptchaWindow).grecaptcha?.enterprise;
   if (existingClient) return;
 
   if (!scriptLoadPromise) {
@@ -80,7 +82,7 @@ const loadRecaptchaScript = async () => {
 export const getRecaptchaClient = async () => {
   await loadRecaptchaScript();
 
-  const client = (window as RecaptchaWindow).grecaptcha;
+  const client = (window as RecaptchaWindow).grecaptcha?.enterprise;
 
   if (!client) {
     throw new Error(
